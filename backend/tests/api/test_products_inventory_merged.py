@@ -252,6 +252,27 @@ class TestCSVExport:
 
 
 class TestCSVImport:
+    @pytest.mark.parametrize("header, rate", [
+        ("GST Rate", "18"),
+        ("Tax Rate", "18"),
+        ("gst_rate", "18%"),
+        ("TAX RATE", "18%"),
+        ("Tax", "18"),
+        ("GST", "18"),
+    ])
+    def test_import_csv_accepts_tax_rate_headers(self, client, header, rate):
+        content = f"Item Name,Item Code,Selling Price,HSN Code,{header}\nWidget,WID-1,100,8471,{rate}\n"
+        response = client.post(
+            "/api/products/import-csv",
+            files={"file": ("products.csv", content.encode("utf-8"), "text/csv")},
+        )
+        assert response.status_code == 200
+        assert response.json() == {"created": 1, "updated": 0, "errors": []}
+
+        products = client.get("/api/products/with-inventory?search=WID-1")
+        assert products.status_code == 200
+        assert [item["gst_rate"] for item in products.json()["items"]] == [18]
+
     def test_import_csv_creates_new_products(self, client):
         csv_content = (
             "Item Name,Item Code,Selling Price,Current Stock,Tax,Description,HSN Code,Unit\n"

@@ -48,6 +48,7 @@ const ACCEPTED_HEADERS: Array<{ label: string; alt?: string; required?: boolean 
   { label: 'HSN Code' },
   { label: 'Unit' },
   { label: 'Tax', alt: 'GST' },
+  { label: 'GST Rate', alt: 'Tax Rate' },
 ];
 
 const TITLE_ID = 'catalogue-import-title';
